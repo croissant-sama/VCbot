@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace VCBot
 {
-    public class ScreenshotService
+    class ScreenshotService
     {
         public Bitmap Do()
         {

@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace VCBot
 {
-    public class MouseService
+    class MouseService
     {
         [Flags]
         private enum MouseEventFlags
@@ -77,8 +77,6 @@ namespace VCBot
             SetCursorPos(x, y);
             MouseEvent(MouseEventFlags.LeftDown);
             MouseEvent(MouseEventFlags.LeftUp);
-
-            Console.WriteLine("Click!");
         }
     }
 }
