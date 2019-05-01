@@ -19,9 +19,6 @@ namespace VCBot
                 random
             );
             program.Run();
-
-            Console.WriteLine("Программа завершена");
-            Console.ReadKey();
         }
         
         private MouseService MouseService;
@@ -29,6 +26,13 @@ namespace VCBot
         private ScreenshotService ScreenshotService;
         private Logger Logger;
         private Random Random;
+
+        private Action<OpenCvSharp.Point, int, int> ClickAction;
+        private Action<OpenCvSharp.Point, int, int> ClickUpAction;
+        private Action<OpenCvSharp.Point, int, int> ClickErrorAction;
+
+        private double Delta = 0.9;
+        private int Attemps = 5;
 
         public Program(
             MouseService mouseService,
@@ -43,6 +47,10 @@ namespace VCBot
             ScreenshotService = screenshotService;
             Logger = logger;
             Random = random;
+
+            ClickAction = (point, width, height) => Click(point, width, height);
+            ClickUpAction = (point, width, height) => ClickUp(point, width, height);
+            ClickErrorAction = (point, width, height) => ClickError(point, width, height);
         }
 
         public void Run()
@@ -50,60 +58,55 @@ namespace VCBot
             while (true)
             {
                 Bitmap screenshot = ScreenshotService.Do();
-
-                double delta = 0.9;
-                int attemps = 5;
-
-                Action<OpenCvSharp.Point, int, int> clickAction =
-                    (point, width, height) => Click(point, width, height);
-                Action<OpenCvSharp.Point, int, int> clickUpAction =
-                    (point, width, height) => ClickUp(point, width, height);
-                Action<OpenCvSharp.Point, int, int> clickErrorAction =
-                    (point, width, height) => ClickError(point, width, height);
-
-                if (TryToClick(Resources.error, clickErrorAction, delta, "error"))
+                
+                if (TryToClick(screenshot, Resources.error, ClickErrorAction, "error"))
                 {
                     continue;
                 }
 
-                if (TryToClick(Resources.ok, clickAction, delta, "ok"))
+                if (TryToClick(screenshot, Resources.cancel, ClickAction, "cancel"))
                 {
                     continue;
                 }
 
-                if (TryToClick(Resources.up, clickUpAction, delta, "up"))
+                if (TryToClick(screenshot, Resources.ok, ClickAction, "ok"))
                 {
-                    while (TryToClick(Resources.up, clickUpAction, delta, "up")) ;
+                    continue;
+                }
+
+                if (TryToClick(screenshot, Resources.up, ClickUpAction, "up"))
+                {
+                    while (TryToClick(ScreenshotService.Do(), Resources.up, ClickUpAction, "up")) ;
                     continue;
                 }
                 
-                if (TryToClick(Resources.tech1, clickAction, delta, "tech1"))
+                if (TryToClick(screenshot, Resources.tech1, ClickAction, "tech1"))
                 {
-                    TryToClickGold(delta, attemps);
+                    TryToClickGold();
                     continue;
                 }
 
-                if (TryToClick(Resources.tech2, clickAction, delta, "tech2"))
+                if (TryToClick(screenshot, Resources.tech2, ClickAction, "tech2"))
                 {
-                    TryToClickGold(delta, attemps);
+                    TryToClickGold();
                     continue;
                 }
 
-                if (TryToClick(Resources.tech3, clickAction, delta, "tech3"))
+                if (TryToClick(screenshot, Resources.tech3, ClickAction, "tech3"))
                 {
-                    TryToClickGold(0.9, attemps);
+                    TryToClickGold();
                     continue;
                 }
 
-                if (TryToClick(Resources.tech4, clickAction, delta, "tech4"))
+                if (TryToClick(screenshot, Resources.tech4, ClickAction, "tech4"))
                 {
-                    TryToClickGold(delta, attemps);
+                    TryToClickGold();
                     continue;
                 }
 
-                if (TryToClick(Resources.tech5, clickAction, delta, "tech5"))
+                if (TryToClick(screenshot, Resources.tech5, ClickAction, "tech5"))
                 {
-                    TryToClickGold(delta, attemps);
+                    TryToClickGold();
                     continue;
                 }
 
@@ -111,17 +114,15 @@ namespace VCBot
             }
         }
         
-        private bool TryToClick(Bitmap resource, Action<OpenCvSharp.Point, int, int> clickAction, double delta, string step)
+        private bool TryToClick(Bitmap screenshot, Bitmap resource, Action<OpenCvSharp.Point, int, int> clickAction, string step)
         {
-            Bitmap screenshot = ScreenshotService.Do();
-
             double maxVal;
             OpenCvSharp.Point maxLoc;
 
             Match(resource, screenshot, out maxVal, out maxLoc);
             Logger.Log(step + ": " + maxVal + " " + maxLoc);
 
-            if (maxVal < delta)
+            if (maxVal < Delta)
             {
                 return false;
             }
@@ -132,26 +133,15 @@ namespace VCBot
             return true;
         }
         
-        private bool TryToClickGold(double delta, int attemps)
+        private bool TryToClickGold()
         {
-            Bitmap resource = Resources.gold;
-
-            double maxVal;
-            OpenCvSharp.Point maxLoc;
-
-            for(int i = 0; i < attemps; i++)
+            for(int i = 0; i < Attemps; i++)
             {
-                Bitmap screenshot = ScreenshotService.Do();
-
-                Match(resource, screenshot, out maxVal, out maxLoc);
-                Logger.Log("gold: " + maxVal + " " + maxLoc);
-
-                if (maxVal >= delta)
+                if (TryToClick(ScreenshotService.Do(), Resources.gold, ClickAction, "gold"))
                 {
-                    Click(maxLoc, resource.Width, resource.Height);
                     return true;
                 }
-
+                
                 DelayService.RandomSleep(1, 2);
             }
 

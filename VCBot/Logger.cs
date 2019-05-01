@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using VCBot.Properties;
 
 namespace VCBot
 {
@@ -7,12 +8,18 @@ namespace VCBot
     {
         public void Log(string message)
         {
-            Console.WriteLine(message);
+            if (Settings.Default.LoggingMessage)
+            {
+                Console.WriteLine(message);
+            }
         }
 
         public void Log(Bitmap image)
         {
-            image.Save(DateTime.Now.ToString("yyyyMMddHHmmss") + ".png" );
+            if (Settings.Default.LoggingImage)
+            {
+                image.Save(DateTime.Now.ToString("yyyyMMddHHmmss") + ".png");
+            }
         }
     }
 }
