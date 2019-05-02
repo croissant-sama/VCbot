@@ -83,34 +83,29 @@ namespace VCBot
                 if (TryToClick(screenshot, Resources.tech1, ClickAction, "tech1"))
                 {
                     TryToClickGold();
-                    continue;
                 }
 
                 if (TryToClick(screenshot, Resources.tech2, ClickAction, "tech2"))
                 {
                     TryToClickGold();
-                    continue;
                 }
 
                 if (TryToClick(screenshot, Resources.tech3, ClickAction, "tech3"))
                 {
                     TryToClickGold();
-                    continue;
                 }
 
                 if (TryToClick(screenshot, Resources.tech4, ClickAction, "tech4"))
                 {
                     TryToClickGold();
-                    continue;
                 }
 
                 if (TryToClick(screenshot, Resources.tech5, ClickAction, "tech5"))
                 {
                     TryToClickGold();
-                    continue;
                 }
 
-                DelayService.RandomSleep(1, 15);
+                DelayService.RandomSleep(30, 20 * 60);
             }
         }
         
